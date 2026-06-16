@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BonoPay — Navimag</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --color-background-primary:#ffffff;
+      --color-background-secondary:#f8f9fa;
+      --color-background-tertiary:#f1f3f5;
+      --color-text-primary:#1a1a2e;
+      --color-text-secondary:#6c757d;
+      --color-border-tertiary:#dee2e6;
+      --color-border-secondary:#ced4da;
+      --font-sans:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+      --border-radius-md:6px;
+      --border-radius-lg:10px;
+    }
+    body{font-family:var(--font-sans);font-size:13px;color:var(--color-text-primary);background:var(--color-background-tertiary)}
+
+    /* LOGIN */
+    .login-screen{display:flex;align-items:center;justify-content:center;height:100vh;background:linear-gradient(135deg,#0F6E56 0%,#1a4e6b 100%)}
+    .login-box{background:#fff;border-radius:16px;padding:40px;width:360px;box-shadow:0 20px 60px rgba(0,0,0,.15)}
+    .login-logo{text-align:center;margin-bottom:28px}
+    .login-logo i{font-size:40px;color:#1D9E75}
+    .login-logo h1{font-size:22px;font-weight:600;margin-top:8px}
+    .login-logo p{font-size:12px;color:#6c757d;margin-top:4px}
+    .login-field{margin-bottom:16px}
+    .login-field label{display:block;font-size:11px;font-weight:500;color:#6c757d;margin-bottom:5px;text-transform:uppercase;letter-spacing:.5px}
+    .login-field input{width:100%;padding:10px 12px;border:1px solid #dee2e6;border-radius:8px;font-size:13px;font-family:inherit;outline:none;transition:border-color .15s}
+    .login-field input:focus{border-color:#1D9E75}
+    .login-btn{width:100%;padding:11px;background:#1D9E75;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;margin-top:8px;transition:background .15s}
+    .login-btn:hover{background:#0F6E56}
+    .login-error{color:#A32D2D;font-size:12px;margin-top:8px;text-align:center;display:none}
+
+    /* APP */
+    .app{display:flex;height:100vh;min-height:650px}
+    .sidebar{width:185px;background:var(--color-background-primary);border-right:0.5px solid var(--color-border-tertiary);display:flex;flex-direction:column;padding:12px 0;flex-shrink:0}
+    .logo{padding:0 14px 14px;border-bottom:0.5px solid var(--color-border-tertiary);margin-bottom:6px}
+    .logo-top{font-size:14px;font-weight:500}.logo-sub{font-size:10px;color:var(--color-text-secondary);margin-top:2px}
+    .nav{display:flex;align-items:center;gap:7px;padding:7px 14px;cursor:pointer;font-size:12px;color:var(--color-text-secondary);border-left:2px solid transparent;transition:all .12s}
+    .nav:hover{background:var(--color-background-secondary);color:var(--color-text-primary)}
+    .nav.on{color:var(--color-text-primary);background:var(--color-background-secondary);border-left-color:#1D9E75;font-weight:500}
+    .nav-sect{font-size:10px;color:var(--color-text-secondary);padding:10px 14px 4px;text-transform:uppercase;letter-spacing:.5px;font-weight:500}
+    .nav-bottom{margin-top:auto;border-top:0.5px solid var(--color-border-tertiary);padding-top:6px}
+    .sb{display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:100px;background:#1D9E75;color:#fff;font-size:9px;font-weight:600;flex-shrink:0}
+    .main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+    .topbar{background:var(--color-background-primary);border-bottom:0.5px solid var(--color-border-tertiary);padding:9px 18px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+    .tbar-title{font-size:13px;font-weight:500}
+    .content{flex:1;overflow-y:auto;padding:14px 18px}
+    .screen{display:none}.screen.on{display:block}
+    .card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:14px;margin-bottom:12px}
+    .metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px}
+    .metric{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:10px}
+    .m-label{font-size:10px;color:var(--color-text-secondary);margin-bottom:2px}
+    .m-val{font-size:18px;font-weight:500}.m-val.g{color:#0F6E56}
+    .btn{display:inline-flex;align-items:center;gap:5px;padding:5px 11px;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);background:transparent;cursor:pointer;font-size:12px;color:var(--color-text-primary);transition:all .12s;font-family:inherit}
+    .btn:hover{background:var(--color-background-secondary)}
+    .btn.p{background:#1D9E75;color:#fff;border-color:#1D9E75}.btn.p:hover{background:#0F6E56}
+    .btn.sm{padding:3px 8px;font-size:11px}
+    .btn.warn{color:#A32D2D;border-color:#F7C1C1}.btn.warn:hover{background:#FCEBEB}
+    .btn.ghost{border-style:dashed;color:var(--color-text-secondary)}.btn.ghost:hover{color:var(--color-text-primary)}
+    .btn.sec{background:var(--color-background-secondary)}
+    table{width:100%;border-collapse:collapse;font-size:12px}
+    th{text-align:left;padding:6px 8px;color:var(--color-text-secondary);font-weight:500;font-size:10px;border-bottom:0.5px solid var(--color-border-tertiary);text-transform:uppercase;letter-spacing:.4px;white-space:nowrap}
+    td{padding:6px 8px;border-bottom:0.5px solid var(--color-border-tertiary);vertical-align:middle}
+    tr:last-child td{border-bottom:none}
+    tr:hover td{background:var(--color-background-secondary)}
+    .badge{display:inline-flex;align-items:center;padding:1px 7px;border-radius:100px;font-size:10px;font-weight:500}
+    .bg{background:#E1F5EE;color:#085041}.bb{background:#E6F1FB;color:#0C447C}
+    .ba{background:#FAEEDA;color:#633806}.bgr{background:#F1EFE8;color:#444441}
+    .tabs{display:flex;border-bottom:0.5px solid var(--color-border-tertiary);margin-bottom:12px}
+    .tab{padding:6px 12px;font-size:12px;cursor:pointer;color:var(--color-text-secondary);border-bottom:2px solid transparent;margin-bottom:-1px}
+    .tab.on{color:var(--color-text-primary);border-bottom-color:#1D9E75;font-weight:500}
+    .sect{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+    .sect-title{font-size:13px;font-weight:500}
+    .fg{display:flex;flex-direction:column;gap:3px}
+    .fg label{font-size:11px;color:var(--color-text-secondary);font-weight:500}
+    input,select{width:100%;padding:5px 8px;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);background:var(--color-background-primary);color:var(--color-text-primary);font-size:12px;font-family:inherit}
+    .g2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+    .g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+    .alert{padding:8px 11px;border-radius:var(--border-radius-md);font-size:11px;margin-bottom:10px;display:flex;gap:6px;align-items:flex-start}
+    .alert.s{background:#E1F5EE;color:#085041;border:0.5px solid #9FE1CB}
+    .alert.i{background:#E6F1FB;color:#185FA5;border:0.5px solid #B5D4F4}
+    .alert.w{background:#FAEEDA;color:#633806;border:0.5px solid #FAC775}
+    .wir{display:grid;grid-template-columns:2fr 55px 55px 55px 55px 100px 40px;gap:4px;align-items:center;padding:6px 8px;border-bottom:0.5px solid var(--color-border-tertiary);font-size:12px}
+    .wir:last-child{border-bottom:none}
+    .wir.hdr{font-size:10px;color:var(--color-text-secondary);font-weight:500;text-transform:uppercase;letter-spacing:.4px;background:var(--color-background-secondary);padding:5px 8px}
+    .wir input[type=number]{width:100%;padding:3px 4px;font-size:12px;text-align:center}
+    .ucor{display:grid;grid-template-columns:2fr 55px 55px 55px 55px 100px 40px;gap:4px;align-items:center;padding:6px 8px;border-bottom:0.5px solid var(--color-border-tertiary);font-size:12px}
+    .ucor:last-child{border-bottom:none}
+    .ucor.hdr{font-size:10px;color:var(--color-text-secondary);font-weight:500;text-transform:uppercase;letter-spacing:.4px;background:var(--color-background-secondary);padding:5px 8px}
+    .ucor input[type=number]{width:100%;padding:3px 4px;font-size:12px;text-align:center}
+    .nat-row{display:grid;grid-template-columns:2fr 60px 100px 200px 100px;gap:6px;align-items:center;padding:7px 8px;border-bottom:0.5px solid var(--color-border-tertiary);font-size:12px}
+    .nat-row:last-child{border-bottom:none}
+    .nat-row.hdr{font-size:10px;color:var(--color-text-secondary);font-weight:500;text-transform:uppercase;letter-spacing:.4px;background:var(--color-background-secondary);padding:5px 8px}
+    .nat-row input[type=number]{padding:4px 6px;font-size:12px;text-align:center}
+    .radio-group{display:flex;gap:8px;align-items:center}
+    .radio-group label{display:flex;align-items:center;gap:3px;font-size:11px;cursor:pointer;white-space:nowrap}
+    .radio-group input[type=radio]{width:auto;margin:0}
+    .bono-pmc-row{display:grid;grid-template-columns:2fr 80px 80px 80px 80px 80px 90px 90px 90px;gap:3px;align-items:center;padding:5px 8px;border-bottom:0.5px solid var(--color-border-tertiary);font-size:10px}
+    .bono-pmc-row.hdr{font-size:9px;color:var(--color-text-secondary);font-weight:500;text-transform:uppercase;letter-spacing:.3px;background:var(--color-background-secondary);padding:5px 8px}
+    .bono-row{display:grid;grid-template-columns:2.5fr 1fr 1fr 1fr 1fr 1fr 1fr;gap:4px;align-items:center;padding:6px 8px;border-bottom:0.5px solid var(--color-border-tertiary);font-size:11px}
+    .bono-hdr{font-size:9px;color:var(--color-text-secondary);font-weight:500;text-transform:uppercase;letter-spacing:.3px;background:var(--color-background-secondary);padding:5px 8px}
+    .vrow{display:grid;grid-template-columns:2fr 1fr 1fr 1fr 55px;gap:6px;align-items:center;padding:6px 8px;border-bottom:0.5px solid var(--color-border-tertiary);font-size:11px}
+    .vhdr{font-size:10px;color:var(--color-text-secondary);font-weight:500;text-transform:uppercase;letter-spacing:.4px;background:var(--color-background-secondary)}
+    .port-total{text-align:right;padding:8px;font-size:11px;font-weight:500;border-top:0.5px solid var(--color-border-tertiary);color:var(--color-text-secondary)}
+    .empty-state{text-align:center;padding:30px;color:var(--color-text-secondary);font-size:12px}
+    .cs{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:12px;margin-bottom:10px}
+    .cs-title{font-size:12px;font-weight:500;margin-bottom:8px}
+    .dano-row{display:flex;align-items:center;gap:10px;padding:5px 0;border-bottom:0.5px solid var(--color-border-tertiary);font-size:12px}
+    .dano-row:last-child{border-bottom:none}
+    .viaje-card{border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);margin-bottom:10px;overflow:hidden}
+    .viaje-hdr{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--color-background-secondary)}
+    .viaje-title{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+    .viaje-body{padding:10px 14px}
+    .part-chip{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:100px;font-size:10px;font-weight:500;margin:2px}
+    .part-chip.sind{background:#E1F5EE;color:#085041}
+    .part-chip.nosind{background:#E6F1FB;color:#0C447C}
+    .prog{display:flex;align-items:center;gap:0;margin-bottom:20px}
+    .ps{display:flex;align-items:center;gap:6px;flex:1}
+    .pd{width:24px;height:24px;border-radius:100px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;flex-shrink:0}
+    .pd.done{background:#1D9E75;color:#fff}.pd.active{background:#E6F1FB;color:#185FA5;border:1.5px solid #185FA5}.pd.pend{background:var(--color-background-secondary);color:var(--color-text-secondary)}
+    .pl{font-size:11px}.pl.active{font-weight:500}.pl.pend{color:var(--color-text-secondary)}
+    .pline{width:20px;height:1px;background:var(--color-border-tertiary);flex-shrink:0}
+    .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:100;align-items:flex-start;justify-content:center;padding-top:30px}
+    .modal-overlay.open{display:flex}
+    .modal-box{background:var(--color-background-primary);border-radius:var(--border-radius-lg);padding:20px;width:520px;max-height:85vh;overflow-y:auto}
+    .mhdr{font-size:13px;font-weight:500;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center}
+    .nave-display{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:var(--border-radius-md);margin-top:6px;border:1.5px solid transparent;font-size:12px;font-weight:500;min-height:38px}
+    .nave-display.ez{background:#E1F5EE;color:#085041;border-color:#9FE1CB}
+    .nave-display.dk{background:#E6F1FB;color:#0C447C;border-color:#B5D4F4}
+    .nave-display.none{background:var(--color-background-secondary);color:var(--color-text-secondary)}
+    /* Historial */
+    .hist-row{display:grid;grid-template-columns:1fr 1fr 1fr 1fr 80px;gap:8px;align-items:center;padding:8px 12px;border-bottom:0.5px solid var(--color-border-tertiary);font-size:12px}
+    .hist-row.hdr{font-size:10px;color:var(--color-text-secondary);font-weight:500;text-transform:uppercase;letter-spacing:.4px;background:var(--color-background-secondary);padding:6px 12px}
+    .saving-indicator{position:fixed;bottom:16px;right:16px;background:#1D9E75;color:#fff;padding:8px 14px;border-radius:100px;font-size:11px;display:none;align-items:center;gap:6px;z-index:200}
+    .saving-indicator.show{display:flex}
+  </style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen" class="login-screen">
+  <div class="login-box">
+    <div class="login-logo">
+      <i class="ti ti-ship"></i>
+      <h1>BonoPay</h1>
+      <p>Sistema de bonificaciones Navimag</p>
+    </div>
+    <div class="login-field">
+      <label>Correo electrónico</label>
+      <input type="email" id="login-email" placeholder="jefe@navimag.cl">
+    </div>
+    <div class="login-field">
+      <label>Contraseña</label>
+      <input type="password" id="login-pass" placeholder="••••••••" onkeydown="if(event.key==='Enter')iniciarSesion()">
+    </div>
+    <button class="login-btn" onclick="iniciarSesion()">Ingresar</button>
+    <div class="login-error" id="login-error">Correo o contraseña incorrectos.</div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app-screen" class="app" style="display:none">
+<div class="sidebar">
+  <div class="logo">
+    <div class="logo-top"><i class="ti ti-ship" style="color:#1D9E75;font-size:15px;vertical-align:-2px"></i> BonoPay</div>
+    <div class="logo-sub">Esperanza · Dalka</div>
+  </div>
+  <div class="nav-sect">Flujo del mes</div>
+  <div class="nav on" onclick="nav('dash',this)"><i class="ti ti-layout-dashboard"></i>Resumen</div>
+  <div class="nav" onclick="nav('ingreso',this)"><span class="sb">1</span>Ingresar datos</div>
+  <div class="nav" onclick="nav('viajes',this)"><span class="sb">2</span>Viajes del mes</div>
+  <div class="nav" onclick="nav('cierre',this)"><span class="sb">3</span>Cerrar mes</div>
+  <div class="nav" onclick="nav('bonos',this)"><i class="ti ti-calculator"></i>Bonificaciones</div>
+  <div class="nav-sect">Herramientas</div>
+  <div class="nav" onclick="nav('historial',this)"><i class="ti ti-history"></i>Historial</div>
+  <div class="nav" onclick="nav('verif',this)"><i class="ti ti-checks"></i>Verificación</div>
+  <div class="nav" onclick="nav('workers',this)"><i class="ti ti-users"></i>Trabajadores</div>
+  <div class="nav" onclick="nav('vals',this)"><i class="ti ti-settings"></i>Valores base</div>
+  <div class="nav-bottom">
+    <div class="nav" onclick="cerrarSesion()"><i class="ti ti-logout"></i>Cerrar sesión</div>
+  </div>
+</div>
+<div class="main">
+<div class="topbar">
+  <div class="tbar-title" id="ptitle">Resumen del mes</div>
+  <div style="display:flex;gap:6px;align-items:center">
+    <select id="mes-sel" style="width:130px;font-size:12px" onchange="onMesCambio()">
+      <option value="Enero_2026">Enero 2026</option>
+      <option value="Febrero_2026">Febrero 2026</option>
+      <option value="Marzo_2026">Marzo 2026</option>
+      <option value="Abril_2026">Abril 2026</option>
+      <option value="Mayo_2026">Mayo 2026</option>
+      <option value="Junio_2026">Junio 2026</option>
+      <option value="Julio_2026">Julio 2026</option>
+      <option value="Agosto_2026">Agosto 2026</option>
+      <option value="Septiembre_2026">Septiembre 2026</option>
+      <option value="Octubre_2026">Octubre 2026</option>
+      <option value="Noviembre_2026">Noviembre 2026</option>
+      <option value="Diciembre_2026">Diciembre 2026</option>
+    </select>
+    <button class="btn p" onclick="calcularBonos()"><i class="ti ti-calculator"></i>Calcular</button>
+  </div>
+</div>
+<div class="content">
+
+<!-- DASH -->
+<div class="screen on" id="sc-dash">
+  <div id="dash-alerts"></div>
+  <div class="metrics">
+    <div class="metric"><div class="m-label">Total a pagar</div><div class="m-val g" id="m-total">—</div></div>
+    <div class="metric"><div class="m-label">Trabajadores</div><div class="m-val" id="m-trab">27</div></div>
+    <div class="metric"><div class="m-label">Datos ingresados</div><div class="m-val" id="m-ing">0</div></div>
+    <div class="metric"><div class="m-label">Viajes registrados</div><div class="m-val" id="m-ez">0</div></div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:12px">
+    <div class="card" style="margin:0"><div class="m-label">Puerto Montt</div><div style="font-size:16px;font-weight:500;margin:4px 0" id="d-pmc">—</div><div class="m-label">17 operadores</div></div>
+    <div class="card" style="margin:0"><div class="m-label">Puerto Chacabuco</div><div style="font-size:16px;font-weight:500;margin:4px 0" id="d-uco">—</div><div class="m-label">3 trabajadores</div></div>
+    <div class="card" style="margin:0"><div class="m-label">Puerto Natales</div><div style="font-size:16px;font-weight:500;margin:4px 0" id="d-nat">—</div><div class="m-label">7 trabajadores</div></div>
+  </div>
+  <div class="card">
+    <div style="font-size:12px;font-weight:500;margin-bottom:14px">Pasos del mes</div>
+    <div class="prog">
+      <div class="ps"><div class="pd active" id="pd1">1</div><span class="pl active" id="pl1">Ingresar datos</span></div>
+      <div class="pline"></div>
+      <div class="ps"><div class="pd pend" id="pd2">2</div><span class="pl pend" id="pl2">Viajes</span></div>
+      <div class="pline"></div>
+      <div class="ps"><div class="pd pend" id="pd3">3</div><span class="pl pend" id="pl3">Cerrar mes</span></div>
+      <div class="pline"></div>
+      <div class="ps"><div class="pd pend" id="pd4">✓</div><span class="pl pend" id="pl4">Calcular</span></div>
+    </div>
+    <div style="margin-top:14px;font-size:11px;color:var(--color-text-secondary)">
+      <i class="ti ti-cloud-check" style="color:#1D9E75"></i> Los datos se guardan automáticamente en la nube.
+    </div>
+  </div>
+</div>
+
+<!-- PASO 1 -->
+<div class="screen" id="sc-ingreso">
+  <div class="sect">
+    <div><div class="sect-title">Paso 1 — Ingresar datos del mes</div><div style="font-size:11px;color:var(--color-text-secondary);margin-top:2px">Turnos, faenas y amarras por trabajador</div></div>
+    <div style="display:flex;gap:6px">
+      <button class="btn ghost" onclick="abrirWorker()"><i class="ti ti-user-plus"></i>Nuevo trabajador</button>
+      <button class="btn p" onclick="guardarIngreso()"><i class="ti ti-device-floppy"></i>Guardar</button>
+    </div>
+  </div>
+  <div class="alert i"><i class="ti ti-info-circle"></i>
+    <div><strong>TN</strong>=turnos normales · <strong>TF</strong>=feriado · <strong>FE</strong>=faenas extra · <strong>AM</strong>=amarras<br>El bono Natales se registra en el <strong>Paso 2</strong> al marcar participantes por cada viaje.</div>
+  </div>
+  <div class="tabs">
+    <div class="tab on" onclick="tabIng('pmc',this)">Puerto Montt</div>
+    <div class="tab" onclick="tabIng('uco',this)">Puerto Chacabuco</div>
+    <div class="tab" onclick="tabIng('nat',this)">Puerto Natales</div>
+  </div>
+  <div id="ing-pmc"><div class="card" style="padding:0">
+    <div class="wir hdr"><span>Trabajador</span><span style="text-align:center">TN</span><span style="text-align:center">TF</span><span style="text-align:center">FE</span><span style="text-align:center">AM</span><span style="text-align:center">Cargo</span><span></span></div>
+    <div id="pmc-inputs"></div>
+  </div></div>
+  <div id="ing-uco" style="display:none"><div class="card" style="padding:0">
+    <div class="ucor hdr"><span>Trabajador</span><span style="text-align:center">TN</span><span style="text-align:center">TF</span><span style="text-align:center">FE</span><span style="text-align:center">AM</span><span style="text-align:center">Cargo</span><span></span></div>
+    <div id="uco-inputs"></div>
+  </div></div>
+  <div id="ing-nat" style="display:none"><div class="card" style="padding:0">
+    <div class="nat-row hdr"><span>Trabajador</span><span style="text-align:center">Operó</span><span style="text-align:center">Rendimiento ($)</span><span>Cero daño</span><span style="text-align:center">Otros ($)</span></div>
+    <div id="nat-inputs"></div>
+  </div></div>
+</div>
+
+<!-- PASO 2 -->
+<div class="screen" id="sc-viajes">
+  <div class="sect">
+    <div><div class="sect-title">Paso 2 — Viajes del mes</div><div style="font-size:11px;color:var(--color-text-secondary);margin-top:2px">Registra cada viaje y marca quién participó</div></div>
+    <button class="btn p" onclick="abrirViaje()"><i class="ti ti-plus"></i>Agregar viaje</button>
+  </div>
+  <div class="alert i"><i class="ti ti-info-circle"></i>
+    <div><strong style="color:#085041">EZ 245 — Esperanza</strong> (3 dígitos) → PMC ↔ Natales &nbsp;·&nbsp; <strong style="color:#0C447C">DK 5530 — Dalka</strong> (4 dígitos) → PMC ↔ Chacabuco</div>
+  </div>
+  <div id="lista-viajes"><div class="empty-state" style="padding:40px">Sin viajes registrados.</div></div>
+</div>
+
+<!-- PASO 3 -->
+<div class="screen" id="sc-cierre">
+  <div class="sect"><div><div class="sect-title">Paso 3 — Cerrar mes</div></div></div>
+  <div class="cs">
+    <div class="cs-title"><i class="ti ti-alert-triangle" style="color:#633806"></i> ¿Hubo daños a la carga en Puerto Montt?</div>
+    <div style="font-size:11px;color:var(--color-text-secondary);margin-bottom:8px">Sin daños = 1.2 · Daño leve = 1.1 · Con daños = 0</div>
+    <div id="dano-list-pmc"></div>
+  </div>
+  <div class="cs">
+    <div class="cs-title"><i class="ti ti-alert-triangle" style="color:#633806"></i> ¿Hubo daños en Puerto Chacabuco? (Arza)</div>
+    <div style="font-size:11px;color:var(--color-text-secondary);margin-bottom:10px">Sin daños → $135.168 · Con daños → $126.720</div>
+    <div style="display:flex;gap:16px">
+      <label style="display:flex;align-items:center;gap:6px;font-size:12px;cursor:pointer"><input type="radio" name="dano-uco" value="sin" checked> Sin daños → $135.168</label>
+      <label style="display:flex;align-items:center;gap:6px;font-size:12px;cursor:pointer"><input type="radio" name="dano-uco" value="con"> Con daños → $126.720</label>
+    </div>
+  </div>
+  <div class="cs">
+    <div class="cs-title"><i class="ti ti-file-alert" style="color:#633806"></i> ¿Hubo toma de siniestros este mes?</div>
+    <div style="font-size:11px;color:var(--color-text-secondary);margin-bottom:10px">Afecta el bono de rendimiento de los recepcionistas</div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <label style="display:flex;align-items:center;gap:8px;font-size:12px;cursor:pointer"><input type="radio" name="siniestro" value="completo"> <strong>No hubo siniestros</strong> — Bono rendimiento $135.168</label>
+      <label style="display:flex;align-items:center;gap:8px;font-size:12px;cursor:pointer"><input type="radio" name="siniestro" value="parcial" checked> <strong>Sí hubo siniestros</strong> — Bono rendimiento $130.944</label>
+    </div>
+  </div>
+  <div class="cs">
+    <div class="cs-title"><i class="ti ti-star" style="color:#633806"></i> ¿Algún supervisor tiene bono adicional?</div>
+    <div style="font-size:11px;color:var(--color-text-secondary);margin-bottom:8px">Por reemplazo u otro concepto puntual</div>
+    <div id="sup-extra-list"></div>
+  </div>
+  <button class="btn p" style="width:100%;margin-top:4px" onclick="cerrarMesYCalcular()"><i class="ti ti-calculator"></i>Cerrar mes y calcular bonificaciones</button>
+</div>
+
+<!-- BONOS -->
+<div class="screen" id="sc-bonos">
+  <div class="sect">
+    <div class="sect-title">Bonificaciones — <span id="bonos-mes">—</span></div>
+    <div style="display:flex;gap:6px">
+      <button class="btn sec" onclick="exportarExcel()"><i class="ti ti-file-spreadsheet"></i>Excel</button>
+      <button class="btn sec" onclick="exportarTxt()"><i class="ti ti-download"></i>TXT</button>
+    </div>
+  </div>
+  <div class="tabs">
+    <div class="tab on" onclick="tabBono('pmc',this)">Puerto Montt</div>
+    <div class="tab" onclick="tabBono('uco',this)">Puerto Chacabuco</div>
+    <div class="tab" onclick="tabBono('nat',this)">Puerto Natales</div>
+  </div>
+  <div id="bono-pmc">
+    <div class="card" style="padding:0">
+      <div class="bono-pmc-row hdr"><span>Trabajador</span><span style="text-align:right">B.Turno</span><span style="text-align:right">B.Asist.</span><span style="text-align:right">Natales</span><span style="text-align:right">Faena Ex.</span><span style="text-align:right">KPI/Rend.</span><span style="text-align:right">Cumpl.Ppto</span><span style="text-align:right">B.Resp.</span><span style="text-align:right;font-weight:600">Total</span></div>
+      <div id="rows-pmc"><div class="empty-state">Presiona "Calcular".</div></div>
+      <div class="port-total">Total PMC: <span id="tot-pmc">—</span></div>
+    </div>
+  </div>
+  <div id="bono-uco" style="display:none">
+    <div class="card" style="padding:0">
+      <div class="bono-row bono-hdr"><span>Trabajador</span><span>KPI/Rend.</span><span>Bono viaje</span><span></span><span></span><span></span><span style="text-align:right">Total</span></div>
+      <div id="rows-uco"><div class="empty-state">Presiona "Calcular".</div></div>
+      <div class="port-total">Total UCO: <span id="tot-uco">—</span></div>
+    </div>
+  </div>
+  <div id="bono-nat" style="display:none">
+    <div class="card" style="padding:0">
+      <div class="bono-row bono-hdr"><span>Trabajador</span><span>Rendimiento</span><span>Cero daño</span><span>Asistencia</span><span>Bono otro</span><span></span><span style="text-align:right">Total</span></div>
+      <div id="rows-nat"><div class="empty-state">Presiona "Calcular".</div></div>
+      <div class="port-total">Total NAT: <span id="tot-nat">—</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- HISTORIAL -->
+<div class="screen" id="sc-historial">
+  <div class="sect"><div class="sect-title">Historial de meses</div></div>
+  <div class="alert i"><i class="ti ti-info-circle"></i>Todos los meses calculados y guardados en la nube.</div>
+  <div class="card" style="padding:0">
+    <div class="hist-row hdr"><span>Mes</span><span>Puerto Montt</span><span>Chacabuco</span><span>Natales</span><span style="text-align:right">Total</span></div>
+    <div id="hist-rows"><div class="empty-state">Sin historial aún.</div></div>
+  </div>
+</div>
+
+<!-- VERIF -->
+<div class="screen" id="sc-verif">
+  <div class="sect"><div class="sect-title">Verificación</div><button class="btn p" onclick="verificar()"><i class="ti ti-refresh"></i>Verificar</button></div>
+  <div class="alert i"><i class="ti ti-info-circle"></i>Disponible para Marzo, Abril y Mayo 2026.</div>
+  <div id="verif-res"></div>
+  <div class="card" style="padding:0">
+    <div class="vrow vhdr"><span>Trabajador</span><span>App calcula</span><span>Planilla real</span><span>Diferencia</span><span>Estado</span></div>
+    <div id="verif-rows"><div class="empty-state">Presiona "Verificar".</div></div>
+  </div>
+</div>
+
+<!-- WORKERS -->
+<div class="screen" id="sc-workers">
+  <div class="sect"><div class="sect-title">Trabajadores</div><button class="btn p" onclick="abrirWorker()"><i class="ti ti-user-plus"></i>Nuevo trabajador</button></div>
+  <div class="card" style="padding:0">
+    <table><thead><tr><th>Nombre</th><th>RUT</th><th>Cargo</th><th>Puerto</th><th>Tipo</th><th>B.Asistencia</th><th></th></tr></thead>
+    <tbody id="tabla-workers"></tbody></table>
+  </div>
+</div>
+
+<!-- VALS -->
+<div class="screen" id="sc-vals">
+  <div class="sect-title" style="margin-bottom:12px">Valores base</div>
+  <div class="cs" style="margin-bottom:12px">
+    <div class="cs-title"><i class="ti ti-trending-up" style="color:#633806"></i> Reajuste IPC</div>
+    <div style="display:flex;gap:10px;align-items:flex-end;margin-top:8px">
+      <div class="fg" style="width:150px"><label>% Reajuste</label><input type="number" id="ipc-pct" placeholder="Ej: 1.5" step="0.1"></div>
+      <button class="btn p" onclick="aplicarIPC()"><i class="ti ti-refresh"></i>Aplicar</button>
+    </div>
+    <div id="ipc-preview" style="margin-top:8px;font-size:11px"></div>
+  </div>
+  <div class="card">
+    <div style="font-size:11px;font-weight:500;color:var(--color-text-secondary);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Turnos PMC</div>
+    <div class="g3">
+      <div class="fg"><label>Turno normal</label><input type="number" id="v-tn" value="1000"></div>
+      <div class="fg"><label>Turno feriado</label><input type="number" id="v-td" value="1500"></div>
+      <div class="fg"><label>Amarra/Largada</label><input type="number" id="v-am" value="7857"></div>
+      <div class="fg"><label>Faena extra</label><input type="number" id="v-fe" value="26400"></div>
+      <div class="fg"><label>KPI sindicato</label><input type="number" id="v-ks" value="42240"></div>
+      <div class="fg"><label>KPI no sindicato</label><input type="number" id="v-kn" value="36960"></div>
+    </div>
+    <div style="font-size:11px;font-weight:500;color:var(--color-text-secondary);text-transform:uppercase;letter-spacing:.5px;margin:12px 0 8px">Bono asistencia PMC</div>
+    <div class="g3">
+      <div class="fg"><label>Choquero/Conductor</label><input type="number" id="v-ch" value="210000"></div>
+      <div class="fg"><label>Embarcador</label><input type="number" id="v-em" value="210000"></div>
+      <div class="fg"><label>Patero/Ay.chofer</label><input type="number" id="v-pa" value="200000"></div>
+      <div class="fg"><label>Portalonero</label><input type="number" id="v-po" value="150000"></div>
+    </div>
+    <div style="font-size:11px;font-weight:500;color:var(--color-text-secondary);text-transform:uppercase;letter-spacing:.5px;margin:12px 0 8px">Supervisores PMC</div>
+    <div class="g2">
+      <div class="fg"><label>Factor supervisor</label><input type="number" id="v-fs" value="1.5" step="0.1"></div>
+      <div class="fg"><label>Base ppto nave ($)</label><input type="number" id="v-pp" value="105600"></div>
+    </div>
+    <div style="font-size:11px;font-weight:500;color:var(--color-text-secondary);text-transform:uppercase;letter-spacing:.5px;margin:12px 0 8px">Bono Natales por viaje</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px">
+      <div class="fg"><label>Bono 1 Sindic.</label><input type="number" id="v-b1s" value="26400"></div>
+      <div class="fg"><label>Bono 1 No sindic.</label><input type="number" id="v-b1n" value="24024"></div>
+      <div class="fg"><label>Bono 2 Sindic.</label><input type="number" id="v-b2s" value="33000"></div>
+      <div class="fg"><label>Bono 2 No sindic.</label><input type="number" id="v-b2n" value="29040"></div>
+    </div>
+    <div style="font-size:11px;font-weight:500;color:var(--color-text-secondary);text-transform:uppercase;letter-spacing:.5px;margin:12px 0 8px">Puerto Natales</div>
+    <div class="g2">
+      <div class="fg"><label>Cero daño tractoristas</label><input type="number" id="v-nd" value="45000"></div>
+      <div class="fg"><label>Asistencia tractoristas</label><input type="number" id="v-na" value="120000"></div>
+    </div>
+    <div style="font-size:11px;font-weight:500;color:var(--color-text-secondary);text-transform:uppercase;letter-spacing:.5px;margin:12px 0 8px">Puerto Chacabuco</div>
+    <div class="g2">
+      <div class="fg"><label>KPI UCO sindicato</label><input type="number" id="v-ku" value="42240"></div>
+      <div class="fg"><label>KPI UCO no sindicato</label><input type="number" id="v-ku2" value="42240"></div>
+    </div>
+  </div>
+  <button class="btn p" onclick="guardarValores()"><i class="ti ti-device-floppy"></i>Guardar valores</button>
+</div>
+
+</div></div></div>
+
+<!-- MODALES -->
+<div class="modal-overlay" id="modal-worker">
+<div class="modal-box">
+  <div class="mhdr"><div><div style="font-size:14px;font-weight:500">Nuevo trabajador</div></div><span onclick="cerrarModal('worker')" style="cursor:pointer;color:var(--color-text-secondary)"><i class="ti ti-x"></i></span></div>
+  <div class="g2" style="margin-bottom:12px;gap:10px">
+    <div class="fg" style="grid-column:1/-1"><label>Nombre completo *</label><input id="w-nom" oninput="this.value=this.value.toUpperCase()" placeholder="APELLIDO, NOMBRE"><div style="font-size:10px;color:#A32D2D;margin-top:2px" id="w-nom-tip"></div></div>
+    <div class="fg"><label>RUT *</label><input id="w-rut" placeholder="12.345.678-9"><div style="font-size:10px;color:#A32D2D;margin-top:2px" id="w-rut-tip"></div></div>
+    <div class="fg"><label>Puerto</label><select id="w-pue" onchange="actualizarCargos()"><option value="PMC">Puerto Montt</option><option value="UCO">Puerto Chacabuco</option><option value="NAT">Puerto Natales</option></select></div>
+    <div class="fg"><label>Cargo</label><select id="w-cargo" onchange="actualizarPreviewBA()"></select></div>
+    <div class="fg"><label>Tipo contrato</label><select id="w-tipo"><option value="SIND">Sindicalizado</option><option value="NOSIND">No sindicalizado</option></select></div>
+    <div class="fg"><label>Bono asistencia</label><input id="w-ba-preview" readonly style="background:var(--color-background-secondary);color:var(--color-text-secondary)"></div>
+  </div>
+  <div class="alert i" style="margin-bottom:12px"><i class="ti ti-info-circle"></i><div id="w-preview-text">Selecciona el cargo.</div></div>
+  <div style="display:flex;gap:8px"><button class="btn" onclick="cerrarModal('worker')" style="flex:1">Cancelar</button><button class="btn p" onclick="guardarWorker()" style="flex:2"><i class="ti ti-user-plus"></i>Agregar</button></div>
+</div>
+</div>
+
+<div class="modal-overlay" id="modal-viaje">
+<div class="modal-box">
+  <div class="mhdr">
+    <div><div style="font-size:14px;font-weight:500">Registrar viaje</div><div style="font-size:11px;color:var(--color-text-secondary);margin-top:2px">El barco se identifica automáticamente</div></div>
+    <span onclick="cerrarModal('viaje')" style="cursor:pointer;color:var(--color-text-secondary)"><i class="ti ti-x"></i></span>
+  </div>
+  <div class="g2" style="margin-bottom:12px;gap:10px">
+    <div class="fg"><label>N° de viaje *</label><input id="vj-num" placeholder="Ej: EZ 245 o DK 5530" oninput="detectarNave(this.value)" style="font-size:14px;font-weight:500;letter-spacing:.5px"></div>
+    <div class="fg"><label>Barco identificado</label><div class="nave-display none" id="vj-nave-display"><i class="ti ti-ship"></i> Ingresa el número</div></div>
+    <div class="fg"><label>Fecha del viaje</label><input type="date" id="vj-fecha"></div>
+    <div class="fg"><label>Tipo de bono</label><select id="vj-tipo" onchange="actualizarBonoPrev()"><option value="1">Bono 1 — 10 a 12 horas</option><option value="2">Bono 2 — menor a 10 horas</option><option value="0">No cumple — más de 13 horas</option></select></div>
+    <div class="fg"><label>Bono por operador sindicalizado</label><input id="vj-prev-s" readonly style="background:#E1F5EE;color:#085041;font-weight:500"></div>
+    <div class="fg"><label>Bono por operador no sindicalizado</label><input id="vj-prev-n" readonly style="background:#E6F1FB;color:#0C447C;font-weight:500"></div>
+    <div class="fg"><label>Unidades totales (A+B)</label><input type="number" id="vj-unid" value="0"></div>
+    <div class="fg"><label>Daños (unidades)</label><input type="number" id="vj-danos" value="0"></div>
+  </div>
+  <div style="font-size:11px;font-weight:500;margin-bottom:6px;color:var(--color-text-secondary);text-transform:uppercase;letter-spacing:.4px">Trabajadores que participaron</div>
+  <div style="display:flex;gap:6px;margin-bottom:8px">
+    <button class="btn sm" onclick="selTodos(true)">Todos</button>
+    <button class="btn sm" onclick="selTodos(false)">Ninguno</button>
+    <span style="font-size:11px;color:var(--color-text-secondary);align-self:center;margin-left:4px" id="vj-count">0 seleccionados</span>
+  </div>
+  <div id="vj-participantes" style="max-height:200px;overflow-y:auto;border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:8px;display:grid;grid-template-columns:1fr 1fr;gap:4px"></div>
+  <button class="btn p" style="width:100%;margin-top:12px" onclick="guardarViaje()"><i class="ti ti-check"></i>Guardar viaje</button>
+</div>
+</div>
+
+<div class="saving-indicator" id="saving-ind"><i class="ti ti-cloud-upload"></i>Guardando...</div>
+
+<script type="module" src="/src/main.js"></script>
+</body>
+</html>
